@@ -1,0 +1,6 @@
+{
+  "name": "VOID//DROP — Streetwear Engineered for Next Level",
+  "description": "Premium functional streetwear e-commerce prototype combining luxury editorial fashion and futuristic digital loadout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
