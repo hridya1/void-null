@@ -22,19 +22,30 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    // Initial sample item so the cart feels functional immediately, or start empty
-    return [
-      {
-        product: PRODUCTS[0],
-        size: 'L',
-        quantity: 1
+    try {
+      const saved = localStorage.getItem('void_cart_items_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
       }
-    ];
+    } catch (e) {
+      console.warn('Failed to parse cart from storage:', e);
+    }
+    return [];
   });
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [sortOption, setSortOption] = useState<'featured' | 'price-asc' | 'price-desc'>('featured');
+
+  // Sync cart with localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('void_cart_items_v2', JSON.stringify(cartItems));
+    } catch (e) {
+      console.warn('Failed to save cart to storage:', e);
+    }
+  }, [cartItems]);
 
   // Calculate total cart items
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -80,6 +91,11 @@ export default function App() {
   // Remove item from cart
   const handleRemoveItem = (index: number) => {
     setCartItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Clear all items from cart
+  const handleClearCart = () => {
+    setCartItems([]);
   };
 
   // Navigation handlers
@@ -334,6 +350,7 @@ export default function App() {
             isDrawer={false}
             onUpdateQuantity={handleUpdateQuantity}
             onRemoveItem={handleRemoveItem}
+            onClearCart={handleClearCart}
             onContinueShopping={() => setCurrentView('shop')}
           />
         )}
@@ -347,6 +364,7 @@ export default function App() {
         onClose={() => setIsCartDrawerOpen(false)}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
+        onClearCart={handleClearCart}
         onContinueShopping={() => {
           setIsCartDrawerOpen(false);
           setCurrentView('shop');

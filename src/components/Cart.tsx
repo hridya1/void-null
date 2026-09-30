@@ -10,6 +10,7 @@ interface CartProps {
   onClose?: () => void;
   onUpdateQuantity: (index: number, newQty: number) => void;
   onRemoveItem: (index: number) => void;
+  onClearCart?: () => void;
   onContinueShopping: () => void;
 }
 
@@ -20,6 +21,7 @@ export const Cart: React.FC<CartProps> = ({
   onClose,
   onUpdateQuantity,
   onRemoveItem,
+  onClearCart,
   onContinueShopping
 }) => {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
@@ -40,15 +42,27 @@ export const Cart: React.FC<CartProps> = ({
             YOUR CART ({totalItemCount})
           </h2>
         </div>
-        {isDrawer && onClose && (
-          <button
-            onClick={onClose}
-            aria-label="Close cart"
-            className="p-2 text-zinc-400 hover:text-white font-mono text-sm border border-zinc-800 hover:border-zinc-700 bg-zinc-900/60"
-          >
-            ✕
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {items.length > 0 && onClearCart && (
+            <button
+              type="button"
+              onClick={onClearCart}
+              title="Remove all items from loadout"
+              className="text-[11px] font-mono text-zinc-400 hover:text-rose-400 transition-colors uppercase tracking-wider px-2 py-1 border border-zinc-800 hover:border-rose-900/60 bg-zinc-900/40"
+            >
+              CLEAR ALL
+            </button>
+          )}
+          {isDrawer && onClose && (
+            <button
+              onClick={onClose}
+              aria-label="Close cart"
+              className="p-2 text-zinc-400 hover:text-white font-mono text-sm border border-zinc-800 hover:border-zinc-700 bg-zinc-900/60"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Empty State */}
@@ -103,9 +117,12 @@ export const Cart: React.FC<CartProps> = ({
                           type="button"
                           onClick={() => onRemoveItem(index)}
                           aria-label={`Remove ${item.product.name} from cart`}
-                          className="text-zinc-500 hover:text-rose-400 text-xs font-mono transition-colors ml-2"
+                          className="flex items-center gap-1 px-2 py-0.5 text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 text-[11px] font-mono border border-zinc-800/80 hover:border-rose-900/50 rounded-xs transition-colors ml-2 cursor-pointer"
                         >
-                          REMOVE
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>REMOVE</span>
                         </button>
                       </div>
 
@@ -122,10 +139,21 @@ export const Cart: React.FC<CartProps> = ({
                         <button
                           type="button"
                           onClick={() => onUpdateQuantity(index, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                          className="w-7 h-7 flex items-center justify-center font-mono text-xs text-zinc-400 hover:text-white disabled:opacity-30"
+                          title={item.quantity === 1 ? `Remove ${item.product.name} from cart` : "Decrease quantity"}
+                          aria-label={item.quantity === 1 ? `Remove ${item.product.name} from cart` : "Decrease quantity"}
+                          className={`w-8 h-8 flex items-center justify-center font-mono text-sm transition-colors cursor-pointer ${
+                            item.quantity === 1
+                              ? 'text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30'
+                              : 'text-zinc-300 hover:text-white hover:bg-zinc-850'
+                          }`}
                         >
-                          −
+                          {item.quantity === 1 ? (
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          ) : (
+                            "−"
+                          )}
                         </button>
                         <span className="w-8 text-center font-mono text-xs text-zinc-200 tabular-nums">
                           {item.quantity}
@@ -134,7 +162,9 @@ export const Cart: React.FC<CartProps> = ({
                           type="button"
                           onClick={() => onUpdateQuantity(index, item.quantity + 1)}
                           disabled={item.quantity >= 10}
-                          className="w-7 h-7 flex items-center justify-center font-mono text-xs text-zinc-400 hover:text-white disabled:opacity-30"
+                          title="Increase quantity"
+                          aria-label="Increase quantity"
+                          className="w-8 h-8 flex items-center justify-center font-mono text-sm text-zinc-300 hover:text-white hover:bg-zinc-850 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
                         >
                           +
                         </button>
